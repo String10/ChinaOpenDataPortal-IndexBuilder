@@ -35,6 +35,9 @@ public class IndexBuilder implements CommandLineRunner {
     @Value("${websoft.chinaopendataportal.indices.store}")
     private String storePath;
 
+    @Value("${websoft.chinaopendataportal.table}")
+    private String tableName;
+
     public IndexBuilder(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -51,13 +54,14 @@ public class IndexBuilder implements CommandLineRunner {
         fieldType.setStoreTermVectorPositions(true);
         fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
 
-        datasetIdList = jdbcTemplate.queryForList("SELECT DISTINCT(dataset_id) FROM metadata", Integer.class);
-        // System.out.println(datasetIdList);
+        String queryDatasetId = String.format("SELECT DISTINCT(dataset_id) FROM %s", tableName);
+        datasetIdList = jdbcTemplate.queryForList(queryDatasetId, Integer.class);
 
         int totalCount = datasetIdList.size();
         logger.info("Start generating document, total: " + totalCount);
 
-        queryList = jdbcTemplate.queryForList("SELECT * FROM metadata ORDER BY dataset_id LIMIT 10000");
+        String queryDatasetList = String.format("SELECT * FROM %s ORDER BY dataset_id LIMIT 10000", tableName);
+        queryList = jdbcTemplate.queryForList(queryDatasetList);
 
         for (Map<String, Object> di : queryList) {
             Document document = new Document();
@@ -88,7 +92,7 @@ public class IndexBuilder implements CommandLineRunner {
 
     public void run() throws IOException {
     }
-    
+
     @Override
     public void run(String... args) throws Exception {
         indexFactory.init(storePath, analyzer);

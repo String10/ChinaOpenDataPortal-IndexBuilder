@@ -60,7 +60,7 @@ public class IndexBuilder implements CommandLineRunner {
         int totalCount = datasetIdList.size();
         logger.info("Start generating document, total: " + totalCount);
 
-        String queryDatasetList = String.format("SELECT * FROM %s ORDER BY dataset_id LIMIT 10000", tableName);
+        String queryDatasetList = String.format("SELECT * FROM %s ORDER BY dataset_id", tableName);
         queryList = jdbcTemplate.queryForList(queryDatasetList);
 
         for (Map<String, Object> di : queryList) {

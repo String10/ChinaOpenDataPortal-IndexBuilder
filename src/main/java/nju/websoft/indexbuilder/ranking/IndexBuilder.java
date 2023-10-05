@@ -59,6 +59,7 @@ public class IndexBuilder implements CommandLineRunner {
 
         int totalCount = datasetIdList.size();
         logger.info("Start generating document, total: " + totalCount);
+        indexFactory.updateMetadata("totalCount", String.valueOf(totalCount));
 
         String queryDatasetList = String.format("SELECT * FROM %s ORDER BY dataset_id", tableName);
         queryList = jdbcTemplate.queryForList(queryDatasetList);
@@ -74,7 +75,7 @@ public class IndexBuilder implements CommandLineRunner {
                         || name.equals("standard_industry")) {
                     String[] tags = value.split(",");
                     for (String si : tags) {
-                        document.add(new Field(name, si, fieldType));
+                        document.add(new Field(name, si.strip(), fieldType));
                     }
                 } else {
                     document.add(new Field(name, value, fieldType));

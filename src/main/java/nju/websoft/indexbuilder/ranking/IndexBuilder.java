@@ -49,7 +49,7 @@ public class IndexBuilder implements CommandLineRunner {
 
         FieldType fieldType = new FieldType();
         fieldType.setStored(true);
-        fieldType.setTokenized(true);
+        // fieldType.setTokenized(true); // 根据field用途决定是否需要设定为tokenized
         fieldType.setStoreTermVectors(true);
         fieldType.setStoreTermVectorPositions(true);
         fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
@@ -69,16 +69,23 @@ public class IndexBuilder implements CommandLineRunner {
             for (Map.Entry<String, Object> entry : di.entrySet()) {
                 String name = entry.getKey();
                 String value = "";
-                if (entry.getValue() != null)
+                if (entry.getValue() != null) {
                     value = entry.getValue().toString();
-                if (name.equals("category") || name.equals("industry") || name.equals("data_formats")
-                        || name.equals("standard_industry")) {
+                }
+                if (name.equals("province") || name.equals("city")
+                        || name.equals("industry") || name.equals("is_open")) {
+                    fieldType.setTokenized(false);
+                } else {
+                    fieldType.setTokenized(true);
+                }
+                if (name.equals("category") || name.equals("industry")
+                        || name.equals("data_formats") || name.equals("standard_industry")) {
                     String[] tags = value.split(",");
                     for (String si : tags) {
-                        document.add(new Field(name, si.strip(), fieldType));
+                        document.add(new Field(name, si.strip(), new FieldType(fieldType)));
                     }
                 } else {
-                    document.add(new Field(name, value, fieldType));
+                    document.add(new Field(name, value, new FieldType(fieldType)));
                 }
             }
             datasetCount++;
